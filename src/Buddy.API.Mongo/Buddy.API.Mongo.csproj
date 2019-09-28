@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Ivan Schuaste Cavalheiro</Authors>
+    <Company />
+    <Description>Adds Mongo support to BuddyAPI</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>MIT</Copyright>
+    <RepositoryUrl>https://github.com/icavalheiro/buddyapi</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/icavalheiro/buddyapi</PackageProjectUrl>
+    <NeutralLanguage />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Buddy.API\Buddy.API.csproj" />
+  </ItemGroup>
+
+</Project>

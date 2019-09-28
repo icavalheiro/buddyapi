@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Ivan Schuaste Cavalheiro</Authors>
+    <Company />
+    <Description>Adds DB2Filesystem support to BuddyAPI. SHOULD NOT BE USED IN PRODUCTION!</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>MIT</Copyright>
+    <RepositoryUrl>https://github.com/icavalheiro/buddyapi</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/icavalheiro/buddyapi</PackageProjectUrl>
+    <NeutralLanguage />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Buddy.API\Buddy.API.csproj" />
+  </ItemGroup>
+
+</Project>
