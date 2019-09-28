@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/icavalheiro/buddyapi</RepositoryUrl>
     <PackageProjectUrl>https://github.com/icavalheiro/buddyapi</PackageProjectUrl>
     <NeutralLanguage />
+    <PackageTags>api, crud, spa, jwt, model, validation, rapid, sql, mysql, postgre, mssql</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
