@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Buddy.API;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Buddy.API.Models
     /// to have in order to work properly.
     /// </summary>
     [Serializable]
-    public class Entity
+    public class Entity : IEntity
     {
         /// <summary>
         /// Id used in the database

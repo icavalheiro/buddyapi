@@ -1,44 +1,58 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using MongoDB.Driver;
-using Buddy.API.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Net;
+using Buddy.API.Models;
+using Buddy.API.Controllers;
 
-namespace Buddy.API.Mongo
+namespace Buddy.API.Sql.Controllers
 {
     /// <summary>
-    /// An API controller that depends on a mongo database
+    /// API controller that depends on a SQL database.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class MongoApiController<T> : ApiController<T> where T : Entity, new()
+    public abstract class SqlApiController<T> : ApiController<T> where T : Entity, new()
     {
         /// <summary>
-        /// Mongo collection to use
+        /// A database context to be used
         /// </summary>
-        private readonly IMongoCollection<T> _collection;
+        private DbContext _context;
 
-        public MongoApiController(IMongoDatabase db)
+        /// <summary>
+        /// The DB set that corresponds to that type of entity
+        /// </summary>
+        private DbSet<T> _dbSet;
+
+        public SqlApiController(DbContext db)
         {
-            _collection = db.GetCollection<T>(nameof(T));
+            _context = db;
+            _dbSet = _context.Set<T>();
         }
 
         /// <summary>
         /// Creates the given entity into the storage system.
         /// Returns null if this entity already exists.
+        /// 
+        /// You may override it to add custom references to the entity before
+        /// its creation.
         /// </summary>
         /// <param name="entity">Entity to be created</param>
         /// <returns>Created entity</returns>
         protected override T CreateEntity(T entity)
         {
-            if (entity.Id != Guid.Empty && GetEntity(entity.Id).FirstOrDefault() != null)
-            {
+            if (entity.Id != Guid.Empty &&
+                _dbSet
+                    .Where(x => x.Id == entity.Id)
+                    .Take(1)
+                    .Count() > 0)
                 return null;
-            }
 
-            _collection.InsertOne(entity);
+            _dbSet.Add(entity);
+            _context.SaveChanges();
             return entity;
         }
 
@@ -47,33 +61,35 @@ namespace Buddy.API.Mongo
         /// Returns false if no entity matches the given ID
         /// </summary>
         /// <param name="id">Id of the entity to be deleted</param>
-        /// <returns>True if it sucessfully found and deleted the entity</returns>
+        /// <returns>Ture if it sucessfully found and deleted the entity</returns>
         protected override bool DeleteEntity(Guid id)
         {
-            var entity = GetEntity(id).FirstOrDefault();
-            if (entity == null)
+            var current = GetEntity(id).FirstOrDefault();
+            if (current != null)
             {
-                return false;
+                current.DeletionDate = DateTime.Now;
+                return UpdateEntity(id, current) != null;
             }
 
-            entity.DeletionDate = DateTime.Now;
-            return UpdateEntity(id, entity) != null;
+            return false;
         }
 
         /// <summary>
         /// Returns a query with all the entities in the database.
+        /// You should override this if you need to use any special ".includes".
         /// </summary>
         /// <returns>A Queryable with all the entities.</returns>
         protected override IQueryable<T> GetAllEntities()
         {
-            return _collection
-                    .AsQueryable()
+            return _dbSet
                     .Where(x => x.DeletionDate == null);
         }
 
         /// <summary>
         /// Returns a query with only 1 entity that matches the given ID.
-        /// It uses the GetAllEntities() method under the hood.
+        /// It uses the GetAllEntities() method under the hood, so if you
+        /// need to add any special "includes()" you could do only in the
+        /// GetAllEntities method.
         /// </summary>
         /// <param name="id">Id if the Entity</param>
         /// <returns>The IQueryable with the entity entry</returns>
@@ -93,11 +109,15 @@ namespace Buddy.API.Mongo
         /// <returns>The updated entity otherwise null</returns>
         protected override T UpdateEntity(Guid id, T entity)
         {
-            entity.LastUpdateDate = DateTime.Now;
-            var replaceOperation = _collection.ReplaceOne(x => x.Id == id, entity);
-            if (replaceOperation.MatchedCount > 0)
+            var current = GetEntity(id).FirstOrDefault();
+            if (current != null)
             {
-                return entity;
+                entity.Id = current.Id;
+                current = entity;
+                current.LastUpdateDate = DateTime.Now;
+                _dbSet.Update(current);
+                _context.SaveChanges();
+                return current;
             }
 
             return null;

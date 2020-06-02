@@ -23,7 +23,7 @@ namespace Buddy.API.Controllers
     /// <typeparam name="T">Model type that this controller will handle</typeparam>
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class ApiController<T> : ControllerBase where T : Entity, new()
+    public abstract class ApiController<T> : ControllerBase where T : IEntity, new()
     {
         /// <summary>
         /// Holds the cached model json to be returned by this API
