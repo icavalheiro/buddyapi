@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using static Buddy.API.Helpers.ModelHelper;
 using System.Net;
-using Buddy.API.Models;
 using System.Linq;
-using Buddy.API.Helpers;
 using Buddy.API.Enumerators;
-using System.Security.Claims;
 
 namespace Buddy.API.Controllers
 {
@@ -25,22 +20,22 @@ namespace Buddy.API.Controllers
     [ApiController]
     public abstract class ApiController<T> : ControllerBase where T : IEntity, new()
     {
-        /// <summary>
-        /// Holds the cached model json to be returned by this API
-        /// </summary>
         private static JsonResult _modelResult;
+        private readonly IEntityService _entityService;
 
-        public ApiController()
+        public ApiController(IEntityService entityService)
         {
+            _entityService = entityService;
+
             //Loads the model cache if it's not cached yet
             if(_modelResult == null)
             {
-                _modelResult = new JsonResult(GetModelAsJson<T>());
+                _modelResult = new JsonResult(_entityService.GenerateModel<T>());
             }
         }
 
         /// <summary>
-        /// Route: GET api/controllerName/model
+        /// Default route: GET api/[controller]/model?example=false
         /// 
         /// Returns the model json of the model type that this
         /// controller handles. Usefull if you need to handle
@@ -70,45 +65,61 @@ namespace Buddy.API.Controllers
         }
 
         /// <summary>
-        /// Should return all entities from the storage
+        /// Returns an IQueryable with all entities from the entity service.
         /// </summary>
-        /// <returns>A Queryable with all the entities.</returns>
-        protected abstract IQueryable<T> GetAllEntities();
+        /// <returns>IQueryable instance</returns>
+        protected virtual IQueryable<T> GetAllEntities()
+        {
+            return _entityService.GetAll<T>();
+        }
 
         /// <summary>
-        /// Should return an IQueryable from which we would take the first
-        /// entry.
+        /// Returns an IQueryable with one element with the given ID form the 
+        /// entity service.
         /// </summary>
-        /// <param name="id">Id if the Entity</param>
-        /// <returns>The IQueryable with the entity entry</returns>
-        protected abstract IQueryable<T> GetEntity(Guid id);
+        /// <param name="id">Entity ID</param>
+        /// <returns>IQueryable instance</returns>
+        protected virtual IQueryable<T> GetEntity(Guid id)
+        {
+            return _entityService.Get<T>(id);
+        }
 
         /// <summary>
-        /// Creates the given entity into the storage system.
-        /// Should return null if this entity already exists.
+        /// Creates the given entity witht the enitity service.
+        /// Should return null if process failed somehow.
         /// </summary>
         /// <param name="entity">Entity to be created</param>
         /// <returns>Created entity</returns>
-        protected abstract T CreateEntity(T entity);
+        protected virtual T CreateEntity(T entity)
+        {
+            return _entityService.Create<T>(entity);
+        }
 
         /// <summary>
-        /// Updates an entity witht he given ID with the given entity
+        /// Updates an entity with the given ID.
+        /// /// Should return false if no entity matches the given ID.
         /// </summary>
         /// <param name="id">Id of the entity</param>
         /// <param name="entity">Entity to be used as the update agent</param>
         /// <returns>The updated entity otherwise null</returns>
-        protected abstract T UpdateEntity(Guid id, T entity);
+        protected virtual T UpdateEntity(Guid id, T entity)
+        {
+            return _entityService.Update<T>(id, entity);
+        }
 
         /// <summary>
-        /// Deletes an entity with the given ID from the storage.
-        /// Should return false if no entity matches the given ID
+        /// Deletes an entity with the given ID from the entity service.
+        /// Should return false if no entity matches the given ID.
         /// </summary>
         /// <param name="id">Id of the entity to be deleted</param>
         /// <returns>Ture if it sucessfully found and deleted the entity</returns>
-        protected abstract bool DeleteEntity(Guid id);
+        protected virtual bool DeleteEntity(Guid id)
+        {
+            return _entityService.Delete<T>(id);
+        }
 
         /// <summary>
-        /// Route: GET api/controllerName
+        /// Route: GET api/[controller]
         /// 
         /// Lists all the entities that this controller handles.
         /// You can paginate it by sending "?page=1" (it starts at 0)
@@ -135,9 +146,9 @@ namespace Buddy.API.Controllers
                 return new JsonResult(new 
                 {
                     items = entities.ToArray(),
-                    total = total,
-                    page = page,
-                    pageSize = pageSize
+                    total,
+                    page,
+                    pageSize
                 });
             }
 
@@ -146,7 +157,7 @@ namespace Buddy.API.Controllers
         }
 
         /// <summary>
-        /// Route: GET api/controllerName/5
+        /// Route: GET api/[controller]/{id}
         /// 
         /// Get an entity by it's id.
         /// </summary>
@@ -170,7 +181,7 @@ namespace Buddy.API.Controllers
         }
 
         /// <summary>
-        /// Route: POST api/controllerName
+        /// Route: POST api/[controller]
         /// 
         /// Stores the given entity in the provider.
         /// The entity must be valid in order to access this callback.
@@ -196,7 +207,7 @@ namespace Buddy.API.Controllers
         }
 
         /// <summary>
-        /// Route: PUT api/controllerName/5
+        /// Route: PUT api/[controller]/{id}
         /// 
         /// Updated an existing entity with the given entity
         /// </summary>
@@ -226,7 +237,7 @@ namespace Buddy.API.Controllers
         }
 
         /// <summary>
-        /// Route: DELETE api/controllerName/5
+        /// Route: DELETE api/[controller]/{id}
         /// 
         /// Deletes the entity with the given ID.
         /// </summary>

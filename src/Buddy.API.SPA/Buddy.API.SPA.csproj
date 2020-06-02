@@ -10,6 +10,7 @@
     <PackageProjectUrl>https://github.com/icavalheiro/buddyapi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/icavalheiro/buddyapi</RepositoryUrl>
     <PackageTags>api, crud, spa, jwt, model, validation, rapid</PackageTags>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
