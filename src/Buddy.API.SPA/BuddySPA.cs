@@ -1,19 +1,20 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Buddy.API.Helpers
+namespace Buddy
 {
-    public static class SpaHelper
+    public static class SPA
     {
         /// <summary>
         /// Spa router middleware.
         /// It's similar to the Microsoft's SPA middleware but it redirects
-        /// to the HOME controller ("/") instead of the index.html file. That
+        /// to the SPA controller ("/") instead of the index.html file. That
         /// way you could add back-end metrics os something like that.
         /// 
         /// The usage of this middleware is not needed for the API to work properly.
+        /// But in case you want to host a SPA alongiside the API you could use it to
+        /// avoid incompatibilities with routes, since this helper will not affect
+        /// the "/api/*" routes of your API, those not affecting 404 responses wrongly.
         /// 
         /// You should add this middleware as the first one, or as one of the first
         /// ones when setting up the middlewares for your application, since it realies

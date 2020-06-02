@@ -32,12 +32,5 @@ namespace Buddy.API.Models
         /// represents that this entity was never deleted
         /// </summary>
         public DateTime? DeletionDate { get; set; }
-
-        /// <summary>
-        /// Every entity must have a name that easily
-        /// represents it to the human user.
-        /// </summary>
-        [Required]
-        public virtual string Name { get; set; }
     }
 }

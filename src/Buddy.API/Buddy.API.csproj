@@ -12,6 +12,7 @@
     <NeutralLanguage />
     <PackageTags>api, crud, spa, jwt, model, validation, rapid</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

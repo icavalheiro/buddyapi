@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using static Buddy.API.Helpers.LoginHelper;
 using System.IdentityModel.Tokens.Jwt;
 using Buddy.API.Models;
+using System.Security.Claims;
 
-namespace Buddy.API
+namespace Buddy.API.Auth.Jwt.Controllers
 {
     /// <summary>
     /// Controller that hanldes user login with JWT.
@@ -17,11 +17,11 @@ namespace Buddy.API
     /// <typeparam name="T">The user model type</typeparam>
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class LoginController<T> : Controller where T : User
+    public abstract class ApiLoginController : Controller
     {
         private readonly SigningCredentials _credentials;
 
-        public LoginController(SigningCredentials credentials)
+        public ApiLoginController(SigningCredentials credentials)
         {
             _credentials = credentials;
         }
@@ -33,7 +33,7 @@ namespace Buddy.API
         /// <returns>A response containing the token or "unauthorized" in case it fails to validate</returns>
         [AllowAnonymous]
         [HttpPost]
-        public virtual IActionResult Login([FromForm] string username, [FromForm]string password)
+        public virtual IActionResult Login(string username, string password)
         {
             var user = AuthenticateUser(username, password);
 
@@ -58,7 +58,7 @@ namespace Buddy.API
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        protected virtual OkObjectResult BuildOkResultForLogin(T user)
+        protected virtual OkObjectResult BuildOkResultForLogin(ClaimsPrincipal user)
         {
             var token = GenerateJSONWebToken(user);
             return Ok(new
@@ -76,16 +76,15 @@ namespace Buddy.API
         /// </summary>
         /// <param name="user">User to be used to create the JWT token</param>
         /// <returns>The JWT token</returns>
-        protected JwtSecurityToken GenerateJSONWebToken(T user)
+        protected JwtSecurityToken GenerateJSONWebToken(ClaimsPrincipal user)
         {
             var token = new JwtSecurityToken(
                 null,
                 "ApiUser",
-                ToClaims(user.PermissionGroup),
+                user.Claims,
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: _credentials
             );
-
 
             return token;
         }
@@ -96,6 +95,6 @@ namespace Buddy.API
         /// </summary>
         /// <param name="login">The login model to be used</param>
         /// <returns>The user that matches the login or null</returns>
-        protected abstract T AuthenticateUser(string username, string password);
+        protected abstract ClaimsPrincipal AuthenticateUser(string username, string password);
     }
 }

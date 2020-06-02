@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Ivan Schuaste Cavalheiro</Authors>
+    <Company>Ivan Schuaste Cavalheiro</Company>
+    <Description>SPA helper methods for Buddy.API applications that want to selfhost the SPA files.</Description>
+    <Copyright>MIT</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/icavalheiro/buddyapi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/icavalheiro/buddyapi</RepositoryUrl>
+    <PackageTags>api, crud, spa, jwt, model, validation, rapid</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Buddy.API\Buddy.API.csproj" />
+  </ItemGroup>
+
+</Project>

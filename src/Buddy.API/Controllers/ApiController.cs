@@ -7,8 +7,9 @@ using Buddy.API.Models;
 using System.Linq;
 using Buddy.API.Helpers;
 using Buddy.API.Enumerators;
+using System.Security.Claims;
 
-namespace Buddy.API
+namespace Buddy.API.Controllers
 {
     /// <summary>
     /// API Controller that handles all basic CRUD operations.
@@ -246,18 +247,6 @@ namespace Buddy.API
             return NotFound();
         }
 
-
-        /// <summary>
-        /// Returns true if the current user has the given permisison.
-        /// </summary>
-        /// <param name="permission">The permission to be evaluated</param>
-        /// <returns>True if the current user has the given permission</returns>
-        protected virtual bool Can(params string[] permissions)
-        {
-            var userPermissions = GetCurrentUserPermissions();
-            return userPermissions.Can(permissions);
-        }
-
         /// <summary>
         /// Validates if the current user can do the given action.
         /// Override this if you want to controll the actions a given user can do
@@ -272,25 +261,6 @@ namespace Buddy.API
             //lets consider all the same
             //and any user can access
             return true;
-        }
-
-
-        /// <summary>
-        /// Get the current permissions for the logged user.
-        /// </summary>
-        /// <returns>Permission of the current user</returns>
-        protected virtual PermissionGroup GetCurrentUserPermissions()
-        {
-            return LoginHelper.ToPermissionGroup(this.User.Claims); ;
-        }
-
-        /// <summary>
-        /// Detect's if the current context has a user logged in.
-        /// </summary>
-        /// <returns>True if there's a user logged in</returns>
-        protected virtual bool IsLoggedIn()
-        {
-            return this.User != null;
         }
     }
 
