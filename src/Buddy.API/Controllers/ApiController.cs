@@ -18,7 +18,7 @@ namespace Buddy.API.Controllers
     /// <typeparam name="T">Model type that this controller will handle</typeparam>
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class ApiController<T> : ControllerBase where T : IEntity, new()
+    public abstract class ApiController<T> : ControllerBase where T : class, IEntity, new()
     {
         private static JsonResult _modelResult;
         private readonly IEntityService _entityService;

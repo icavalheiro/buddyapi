@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using NSwag.Generation.Processors.Security;
 using System;
-using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace Buddy
 {
@@ -40,7 +42,7 @@ namespace Buddy
         }
 
         /// <summary>
-        /// Assist in the integration of JWT authentication into a asp.net core app
+        /// Assist in the integration of JWT authentication into an asp.net core app
         /// Scheme name: JwtAuth
         /// </summary>
         /// <param name="services"></param>
@@ -71,6 +73,56 @@ namespace Buddy
                     ValidateIssuer = false,
                     IssuerSigningKey = securityKey
                 };
+            });
+        }
+
+        /// <summary>
+        /// Assist in the integration of cookie authentication into an asp.net core app
+        /// Scheme name: CookieAuth
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="loginPath">URL path to the login page to be used in case of access denied</param>
+        /// <param name="name">Cookie name to be used in client storage</param>
+        public static void AddCookieAuth(this IServiceCollection services, string loginPath = "/user/login", string name = "buddy.cookie", int expireDays = 30)
+        {
+            services.AddAuthentication("CookieAuth")
+            .AddCookie("CookieAuth", options =>
+            {
+                options.LoginPath = loginPath;
+                options.Cookie.Name = name;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.MaxAge = TimeSpan.FromDays(expireDays);
+                options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
+            });
+        }
+
+        /// <summary>
+        /// Assist in the integration of Azure AD SSO authentication into and asp.net core app
+        /// The callbackURL will be: /signin-oidc (for logout should be /signout-oidc)
+        /// Scheme name: AzureADAuth
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="tenantId">The tenant GUID string</param>
+        /// <param name="clientId">The client (or private) GUID string</param>
+        /// <param name="websiteDomain">Websites domain, exmaple: "my.gretsite.net"</param>
+        /// <param name="azureInstance">Host server for the Azure AD, the default should fit 99% of use cases</param>
+        public static void AddAzureADAuth(this IServiceCollection services, string tenantId, string clientId, string websiteDomain, string azureInstance = "https://login.microsoftonline.com/")
+        {
+            services.AddAuthentication("AzureADAuth")
+            .AddAzureAD(options => {
+                options.Instance = azureInstance;
+
+                //test azure AD
+                options.ClientId = clientId;
+                options.TenantId = tenantId;
+                options.Domain = websiteDomain;
+                options.CallbackPath = "/signin-oidc";
+            });
+
+            services.Configure<OpenIdConnectOptions>(AzureADDefaults.OpenIdScheme, options =>
+            {
+                options.Authority = options.Authority + "/v2.0/";         // Microsoft identity platform
+                options.TokenValidationParameters.ValidateIssuer = false; // accept several tenants (here simplified)
             });
         }
     }
