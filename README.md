@@ -28,12 +28,12 @@ DocFx will parse the tripple slash comments `/// comment` from code and generate
 
 To generate the docs just:
 ```sh
-$ docfx .\docfx_project\docfx.json
+$ docfx ./docfx_project/docfx.json
 ```
 
 If you are running linux or macos you might install the mono runtime and run docfx using mono:
 ```sh
-$ mono docfx.exe .\docfx_project\docfx.json
+$ mono docfx.exe ./docfx_project/docfx.json
 ```
 
 The generated static website will be in: `.\docfx_project\_site`.
