@@ -11,7 +11,7 @@ namespace Buddy.API.SPA.Controllers
     /// within the wwwroot folder, at: wwwroot/dist/index.html
     /// </summary>
     [Route("/")]
-    public abstract class SpaController:ControllerBase 
+    public abstract class SpaController : ControllerBase 
     {
         private readonly IHostingEnvironment _env;
         private readonly string _pathToIndexHTML;
